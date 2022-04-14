@@ -1,0 +1,8 @@
+name: XClans
+version: '${project.version}'
+main: com.lairon.xclans.XClans
+authors: [ Lairon1 ]
+description: MSCClans 2.0
+website: https://vk.com/mysouliscry
+commands:
+  clan:
