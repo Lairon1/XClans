@@ -24,27 +24,40 @@ public class SettingsLoader {
     private static final String MYSQL_PASSWORD = PROVIDER_PATH + "." + "Password";
     private static final String MYSQL_UPDATE_TIME = PROVIDER_PATH + "." + "UpdateTime";
 
+    private DataProviderSettingsImpl dataProviderSettings;
+    private ClanSettingsImpl clanSettings;
+
     public SettingsLoader(ConfigManager config) {
         this.config = config;
     }
 
     public DataProviderSettings loadDataProviderSettings(){
-        DataProviderSettingsImpl settings = new DataProviderSettingsImpl();
+        return loadDataProviderSettings(dataProviderSettings == null ? new DataProviderSettingsImpl() : dataProviderSettings);
+
+    }
+
+    private DataProviderSettings loadDataProviderSettings(DataProviderSettingsImpl settings){
         settings.isMySqlEnabled = config.getConfig().getBoolean(MYSQL_ENABLE);
         settings.userName = config.getConfig().getString(MYSQL_USERNAME);
         settings.dbName = config.getConfig().getString(MYSQL_DBNAME);
         settings.ip = config.getConfig().getString(MYSQL_IP);
         settings.password = config.getConfig().getString(MYSQL_PASSWORD);
         settings.updateTime = config.getConfig().getInt(MYSQL_UPDATE_TIME);
+        dataProviderSettings = settings;
         return settings;
     }
 
     public ClanSettings loadClanSettings(){
-        ClanSettingsImpl settings = new ClanSettingsImpl();
+        return loadClanSettings(clanSettings == null ? new ClanSettingsImpl() : clanSettings);
+    }
+
+
+    private ClanSettings loadClanSettings(ClanSettingsImpl settings){
         settings.idPattern = config.getConfig().getString(CLAN_REGEX);
         settings.createMoney = config.getConfig().getInt(CLAN_CREATE);
         settings.homeMoney = config.getConfig().getInt(CLAN_HOME);
         settings.colorMoney = config.getConfig().getInt(CLAN_COLOR);
+        clanSettings = settings;
         return settings;
     }
 
@@ -54,21 +67,26 @@ public class SettingsLoader {
         private int createMoney;
         private int colorMoney;
         private int homeMoney;
-
+        @Override
         public String getIdPattern() {
             return idPattern;
         }
-
+        @Override
         public int getCreateMoney() {
             return createMoney;
         }
-
+        @Override
         public int getColorMoney() {
             return colorMoney;
         }
-
+        @Override
         public int getHomeMoney() {
             return homeMoney;
+        }
+
+        @Override
+        public void reload() {
+            loadClanSettings(this);
         }
 
         @Override
@@ -91,29 +109,34 @@ public class SettingsLoader {
         private String ip;
         private String password;
         private long updateTime;
-
+        @Override
         public boolean isMySqlEnabled() {
             return isMySqlEnabled;
         }
-
+        @Override
         public String getUserName() {
             return userName;
         }
-
+        @Override
         public String getDbName() {
             return dbName;
         }
-
+        @Override
         public String getIp() {
             return ip;
         }
-
+        @Override
         public String getPassword() {
             return password;
         }
-
+        @Override
         public long getUpdateTime() {
             return updateTime;
+        }
+
+        @Override
+        public void reload() {
+            loadDataProviderSettings(this);
         }
 
         @Override

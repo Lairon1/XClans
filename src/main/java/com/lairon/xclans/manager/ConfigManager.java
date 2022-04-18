@@ -24,8 +24,14 @@ public class ConfigManager {
         config = main.getConfig();
     }
 
-    public void reloadConfig() throws IOException, InvalidConfigurationException {
-        config.load(configFile);
+    public void reloadConfig(){
+        try {
+            config.load(configFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
     }
 
     public FileConfiguration getConfig() {

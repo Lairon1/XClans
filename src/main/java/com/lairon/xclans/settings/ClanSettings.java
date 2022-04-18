@@ -10,4 +10,5 @@ public interface ClanSettings {
 
     int getHomeMoney();
 
+    void reload();
 }

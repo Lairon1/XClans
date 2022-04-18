@@ -4,5 +4,6 @@ main: com.lairon.xclans.XClans
 authors: [ Lairon1 ]
 description: MSCClans 2.0
 website: https://vk.com/mysouliscry
+api-version: 1.16
 commands:
   clan:

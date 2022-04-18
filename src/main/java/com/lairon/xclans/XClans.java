@@ -1,10 +1,11 @@
 package com.lairon.xclans;
 
+import com.lairon.xclans.api.XClansAPI;
 import com.lairon.xclans.command.ReloadCommand;
-import com.lairon.xclans.commandapi.ClanCommandExecutor;
+import com.lairon.xclans.command.ClanCommandExecutor;
+import com.lairon.xclans.data.DataProvider;
 import com.lairon.xclans.loader.SettingsLoader;
 import com.lairon.xclans.manager.ConfigManager;
-import com.lairon.xclans.manager.DataProviderManager;
 import com.lairon.xclans.registered.RegisteredClans;
 import com.lairon.xclans.registered.RegisteredCommands;
 import org.bukkit.Bukkit;
@@ -12,28 +13,27 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class XClans extends JavaPlugin {
 
-    private ConfigManager configManager;
-    private SettingsLoader settingsLoader;
-    private DataProviderManager dataProviderManager;
-    private RegisteredClans registeredClans;
-    private RegisteredCommands registeredCommands;
-    private ClanCommandExecutor clanCommandExecutor;
 
     @Override
     public void onEnable() {
-        configManager = new ConfigManager(this);
-        settingsLoader = new SettingsLoader(configManager);
-        dataProviderManager = new DataProviderManager(settingsLoader.loadDataProviderSettings());
-        registeredClans = new RegisteredClans();
-        registeredCommands = new RegisteredCommands(this, registeredClans);
-        clanCommandExecutor = new ClanCommandExecutor(registeredCommands);
+        ConfigManager configManager = new ConfigManager(this);
+
+        SettingsLoader settingsLoader = new SettingsLoader(configManager);
+
+        DataProvider dataProvider = new DataProvider(settingsLoader.loadDataProviderSettings(), this);
+
+        RegisteredClans registeredClans = new RegisteredClans(dataProvider);
+
+        RegisteredCommands registeredCommands = new RegisteredCommands();
+
+        ClanCommandExecutor clanCommandExecutor = new ClanCommandExecutor(registeredCommands);
 
         Bukkit.getPluginCommand("clan").setExecutor(clanCommandExecutor);
 
-
+        XClansAPI.set(registeredClans, registeredCommands, settingsLoader, configManager);
     }
 
-    private void initDefaultCommands(){
+    private void initDefaultCommands(RegisteredCommands registeredCommands){
         registeredCommands.registerCommand(ReloadCommand.class);
     }
 
@@ -41,15 +41,4 @@ public final class XClans extends JavaPlugin {
     public void onDisable() {
     }
 
-    public RegisteredClans getRegisteredClans() {
-        return registeredClans;
-    }
-
-    public RegisteredCommands getRegisteredCommands() {
-        return registeredCommands;
-    }
-
-    public ConfigManager getConfigManager() {
-        return configManager;
-    }
 }

@@ -14,4 +14,5 @@ public interface DataProviderSettings {
 
     long getUpdateTime();
 
+    void reload();
 }

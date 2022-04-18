@@ -1,5 +1,6 @@
-package com.lairon.xclans.commandapi;
+package com.lairon.xclans.command;
 
+import com.lairon.xclans.api.commandapi.ClanCommand;
 import com.lairon.xclans.registered.RegisteredCommands;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

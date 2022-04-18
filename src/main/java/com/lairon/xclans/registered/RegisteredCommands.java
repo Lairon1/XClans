@@ -1,7 +1,7 @@
 package com.lairon.xclans.registered;
 
 import com.lairon.xclans.XClans;
-import com.lairon.xclans.commandapi.ClanCommand;
+import com.lairon.xclans.api.commandapi.ClanCommand;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -9,19 +9,12 @@ import java.util.HashMap;
 public class RegisteredCommands {
 
     private HashMap<Class<ClanCommand>, ClanCommand> registeredCommands = new HashMap<>();
-    private XClans main;
-    private RegisteredClans registeredClans;
-
-    public RegisteredCommands(XClans main, RegisteredClans registeredClans) {
-        this.main = main;
-        this.registeredClans = registeredClans;
-    }
 
     public <T extends ClanCommand> void registerCommand(Class<T> commandClass){
         if(getCommandInstance(commandClass) != null)
             throw new IllegalArgumentException("This command is already registered");
         try {
-            ClanCommand command = (ClanCommand) commandClass.getConstructors()[0].newInstance(main, registeredClans, this);
+            ClanCommand command = (ClanCommand) commandClass.getConstructors()[0].newInstance();
             registeredCommands.put((Class<ClanCommand>) commandClass, command);
         } catch (InstantiationException e) {
             e.printStackTrace();

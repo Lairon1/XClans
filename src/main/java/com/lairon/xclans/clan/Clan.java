@@ -2,22 +2,25 @@ package com.lairon.xclans.clan;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 
+import java.util.Date;
 import java.util.HashSet;
 
-public class Clan {
+public class Clan implements Listener {
 
     private String clanID;
     private String owner;
     private HashSet<String> members;
     private HashSet<String> moderators;
     private String welcomeMessage;
-    private int bank;
+    private int balance;
     private int exp;
-    private String date;
-    private String clanTag;
+    private Date date;
+    private ChatColor color;
     private Location clanHome;
     private boolean openCH;
     private int level;
@@ -31,32 +34,50 @@ public class Clan {
     public Clan(String clanID, String owner) {
         this.clanID = clanID;
         this.owner = owner;
+        date = new Date();
     }
 
-    public void sendMessageForMembers(String message){
+    public void of(Clan clan){
+        clanID = clan.getClanID();
+        owner = clan.getOwner();
+        members = clan.getMembers();
+        moderators = clan.getModerators();
+        welcomeMessage = clan.getWelcomeMessage();
+        balance = clan.getBalance();
+        exp = clan.getExp();
+        date = clan.getDate();
+        color = clan.getColor();
+        clanHome = clan.getClanHome();
+        openCH = clan.isOpenCH();
+        level = clan.getLevel();
+        pvp = clan.isPvp();
+        alliances = clan.getAlliances();
+    }
+
+    public void sendMessageForMembers(String message) {
         HashSet<Player> allOnlineMembers = onlineMembers();
         allOnlineMembers.forEach(member -> member.sendMessage(message));
     }
 
-    public void sendMessageForMembers(BaseComponent message){
+    public void sendMessageForMembers(BaseComponent message) {
         HashSet<Player> allOnlineMembers = onlineMembers();
         allOnlineMembers.forEach(member -> member.sendMessage(message));
     }
 
-    public HashSet<Player> onlineMembers(){
+    public HashSet<Player> onlineMembers() {
         HashSet<Player> allOnlineMembers = new HashSet<>();
 
         Player ownerPlayer = Bukkit.getPlayerExact(owner);
-        if(ownerPlayer != null) allOnlineMembers.add(ownerPlayer);
+        if (ownerPlayer != null) allOnlineMembers.add(ownerPlayer);
 
         for (String moderator : moderators) {
             Player moderatorPlayer = Bukkit.getPlayerExact(moderator);
-            if(moderatorPlayer != null) allOnlineMembers.add(moderatorPlayer);
+            if (moderatorPlayer != null) allOnlineMembers.add(moderatorPlayer);
         }
 
         for (String member : members) {
             Player memberPlayer = Bukkit.getPlayerExact(member);
-            if(memberPlayer != null) allOnlineMembers.add(memberPlayer);
+            if (memberPlayer != null) allOnlineMembers.add(memberPlayer);
         }
 
         return allOnlineMembers;
@@ -64,7 +85,7 @@ public class Clan {
 
     @Override
     public boolean equals(Object obj) {
-        if(!(obj instanceof Clan clan)) return false;
+        if (!(obj instanceof Clan clan)) return false;
         return clan.getClanID().equals(clanID);
     }
 
@@ -108,14 +129,6 @@ public class Clan {
         this.welcomeMessage = welcomeMessage;
     }
 
-    public int getBank() {
-        return bank;
-    }
-
-    public void setBank(int bank) {
-        this.bank = bank;
-    }
-
     public int getExp() {
         return exp;
     }
@@ -124,20 +137,12 @@ public class Clan {
         this.exp = exp;
     }
 
-    public String getDate() {
-        return date;
+    public ChatColor getColor() {
+        return color;
     }
 
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getClanTag() {
-        return clanTag;
-    }
-
-    public void setClanTag(String clanTag) {
-        this.clanTag = clanTag;
+    public void setColor(ChatColor color) {
+        this.color = color;
     }
 
     public Location getClanHome() {
@@ -179,4 +184,23 @@ public class Clan {
     public void setAlliances(HashSet<String> alliances) {
         this.alliances = alliances;
     }
+
+    public int getBalance() {
+        return balance;
+    }
+
+    public void setBalance(int balance) {
+        this.balance = balance;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+
+
 }
