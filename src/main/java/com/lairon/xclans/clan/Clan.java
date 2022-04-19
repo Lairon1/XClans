@@ -93,10 +93,6 @@ public class Clan implements Listener {
         return clanID;
     }
 
-    public void setClanID(String clanID) {
-        this.clanID = clanID;
-    }
-
     public String getOwner() {
         return owner;
     }
@@ -201,6 +197,23 @@ public class Clan implements Listener {
         this.date = date;
     }
 
-
-
+    @Override
+    public String toString() {
+        return "Clan{" +
+                "clanID='" + clanID + '\'' +
+                ", owner='" + owner + '\'' +
+                ", members=" + members +
+                ", moderators=" + moderators +
+                ", welcomeMessage='" + welcomeMessage + '\'' +
+                ", balance=" + balance +
+                ", exp=" + exp +
+                ", date=" + date +
+                ", color=" + color +
+                ", clanHome=" + clanHome +
+                ", openCH=" + openCH +
+                ", level=" + level +
+                ", pvp=" + pvp +
+                ", alliances=" + alliances +
+                '}';
+    }
 }

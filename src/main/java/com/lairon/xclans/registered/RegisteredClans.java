@@ -1,57 +1,33 @@
 package com.lairon.xclans.registered;
 
+import com.google.common.collect.Maps;
+import com.lairon.xclans.XClans;
 import com.lairon.xclans.clan.Clan;
 import com.lairon.xclans.data.DataProvider;
-import com.lairon.xclans.data.ProviderCallBack;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Date;
+import javax.annotation.Nullable;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class RegisteredClans {
 
     private final Set<Clan> registeredClans = new HashSet<>();
     private DataProvider dataProvider;
+    private XClans xClans;
 
-
-    public RegisteredClans(DataProvider dataProvider) {
+    public RegisteredClans(DataProvider dataProvider, XClans xClans) {
         this.dataProvider = dataProvider;
-        dataProvider.loadAllClansAsync(answer -> {
-            for (Clan clan : dataProvider.loadAllClans()) registerClan(clan);
-            Bukkit.getLogger().info("Loaded " + registeredClans.size() + " clans");
-        });
-
-//        Clan clan = new Clan("KOT", "Lairon1");
-//        clan.setColor(ChatColor.BLUE);
-//        clan.setBalance(1337);
-//        clan.setClanHome(new Location(Bukkit.getWorld("world"), 12, 100, 233));
-//        clan.setAlliances(new HashSet<>(){{
-//            add("ZTWO");
-//            add("PERSIK");
-//        }});
-//
-//        clan.setModerators(new HashSet<>(){{
-//            add("Fanerka");
-//            add("KotenokMoy");
-//        }});
-//
-//        clan.setMembers(new HashSet<>(){{
-//            add("Izichka");
-//            add("Lolshik");
-//        }});
-//        clan.setPvp(true);
-//        clan.setOpenCH(true);
-//        clan.setExp(1200);
-//        clan.setLevel(3);
-//        clan.setWelcomeMessage("Привет бойчик");
-//        dataProvider.saveClanAsync(clan);
+        this.xClans = xClans;
     }
 
-    public void registerClan(Clan clan) {
+    public void registerClan(@NotNull Clan clan) {
+        Validate.notNull(clan, "Clan cannot be null");
         if (getClanByID(clan.getClanID()) != null)
             throw new IllegalArgumentException("This clan is already registered");
         if (getPlayerClan(clan.getOwner()) != null)
@@ -59,7 +35,10 @@ public class RegisteredClans {
         registeredClans.add(clan);
     }
 
-    public Clan getClanByID(String id) {
+    @Nullable
+    public Clan getClanByID(@NotNull String id) {
+        Validate.notNull(id, "Clan id cannot be null");
+        Validate.notEmpty(id, "Clan id cannot be empty");
         if (registeredClans.isEmpty()) return null;
         var first = registeredClans
                 .stream()
@@ -70,11 +49,14 @@ public class RegisteredClans {
         return first.get();
     }
 
+    @Nullable
     public Clan getPlayerClan(Player player) {
         return getPlayerClan(player.getName());
     }
 
-    public Clan getPlayerClan(String player) {
+    @Nullable
+    public Clan getPlayerClan(@NotNull String player) {
+        Validate.notNull(player);
         if (registeredClans.isEmpty()) return null;
         var first = registeredClans
                 .stream()
@@ -89,20 +71,40 @@ public class RegisteredClans {
         return first.get();
     }
 
-    public void saveClan(Clan clan){
-        dataProvider.saveClanAsync(clan);
+    public void saveClan(@NotNull Clan clan){
+        Validate.notNull(clan, "Clan id cannot be null");
+        Bukkit.getScheduler().runTaskAsynchronously(xClans, ()-> {
+            try {
+                dataProvider.saveClan(clan);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
-    public void reloadClanDataAsync(Clan clan, ProviderCallBack<Clan> callBack){
-       dataProvider.loadClanByIDAsync(clan.getClanID(), (clan1)->{
-           clan.of(clan1);
-           callBack.callBack(clan);
-       });
+    public void reloadClanData(@NotNull Clan clan, @Nullable Consumer<Clan> callBack) {
+        Validate.notNull(clan, "Clan cannot be null");
+        Bukkit.getScheduler().runTaskAsynchronously(xClans, ()->{
+            try {
+                var nowClan = dataProvider.loadClanByID(clan.getClanID());
+                if(nowClan == null){
+                    if(callBack != null)
+                        callBack.accept(null);
+                    return;
+                }
+
+                clan.of(nowClan);
+                if(callBack != null)
+                callBack.accept(nowClan);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
-    public void reloadClanData(Clan clan){
-        var nowClan = dataProvider.loadClanByID(clan.getClanID());
-        clan.of(clan);
+    @NotNull
+    public HashSet<Clan> getAllClans(){
+        return new HashSet<>(registeredClans);
     }
 
 }

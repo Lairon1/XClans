@@ -21,6 +21,7 @@ public class ReloadCommand extends ClanCommand {
         return false;
     }
 
+
     @Override
     public String argument() {
         return "reload";

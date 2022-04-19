@@ -1,16 +1,20 @@
 package com.lairon.xclans.registered;
 
-import com.lairon.xclans.XClans;
 import com.lairon.xclans.api.commandapi.ClanCommand;
+import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class RegisteredCommands {
 
     private HashMap<Class<ClanCommand>, ClanCommand> registeredCommands = new HashMap<>();
 
-    public <T extends ClanCommand> void registerCommand(Class<T> commandClass){
+    public <T extends ClanCommand> void registerCommand(@NotNull Class<T> commandClass){
+        Validate.notNull(commandClass, "Command class cannot be null");
         if(getCommandInstance(commandClass) != null)
             throw new IllegalArgumentException("This command is already registered");
         try {
@@ -25,12 +29,17 @@ public class RegisteredCommands {
         }
     }
 
-    public <T extends ClanCommand> T getCommandInstance(Class<T> commandClass){
+    @Nullable
+    public <T extends ClanCommand> T getCommandInstance(@NotNull Class<T> commandClass){
+        Validate.notNull(commandClass, "Command class cannot be null");
         if(!registeredCommands.containsKey(commandClass)) return null;
         else return (T) registeredCommands.get(commandClass);
     }
 
-    public ClanCommand getCommandInstanceByArgument(String argument){
+    @Nullable
+    public ClanCommand getCommandInstanceByArgument(@NotNull String argument){
+        Validate.notNull(argument, "Clan command argument cannot be null");
+        Validate.notEmpty(argument, "Clan command argument cannot be empty");
         var first = registeredCommands
                 .values()
                 .stream()
@@ -40,4 +49,7 @@ public class RegisteredCommands {
         else return first.get();
     }
 
+    public Collection<String> getAllRegisteredCommands(){
+        return registeredCommands.values();
+    }
 }
