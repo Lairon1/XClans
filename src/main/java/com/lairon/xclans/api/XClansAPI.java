@@ -1,16 +1,29 @@
 package com.lairon.xclans.api;
 
-import com.lairon.xclans.loader.SettingsLoader;
-import com.lairon.xclans.manager.ConfigManager;
+import com.lairon.xclans.manager.SettingsManager;
 import com.lairon.xclans.registered.RegisteredClans;
 import com.lairon.xclans.registered.RegisteredCommands;
+import com.lairon.xclans.settings.ClanSettings;
+import com.lairon.xclans.settings.DataProviderSettings;
 
 public class XClansAPI {
 
     private static RegisteredClans registeredClans;
     private static RegisteredCommands registeredCommands;
-    private static SettingsLoader settingsLoader;
-    private static ConfigManager configManager;
+    private static ClanSettings clanSettings;
+    private static DataProviderSettings dataProviderSettings;
+    private static boolean isInit = false;
+
+
+    public XClansAPI(RegisteredClans clans, RegisteredCommands cmd, SettingsManager settings) {
+        if (isInit)
+            throw new RuntimeException("Already set");
+        isInit = true;
+        registeredClans = clans;
+        registeredCommands = cmd;
+        dataProviderSettings = settings.loadDataProviderSettings();
+        clanSettings = settings.loadClanSettings();
+    }
 
     public static RegisteredClans getRegisteredClans() {
         return registeredClans;
@@ -20,23 +33,11 @@ public class XClansAPI {
         return registeredCommands;
     }
 
-    public static SettingsLoader getSettingsLoader() {
-        return settingsLoader;
+    public static ClanSettings getClanSettings() {
+        return clanSettings;
     }
 
-    public static ConfigManager getConfigManager() {
-        return configManager;
-    }
-
-    public static void set(RegisteredClans clans, RegisteredCommands cmds, SettingsLoader loader, ConfigManager config) {
-        if (registeredClans != null
-                || registeredCommands != null
-                || settingsLoader != null
-                || configManager != null)
-            throw new RuntimeException("Already set");
-        registeredClans = clans;
-        registeredCommands = cmds;
-        settingsLoader = loader;
-        configManager = config;
+    public static DataProviderSettings getDataProviderSettings() {
+        return dataProviderSettings;
     }
 }

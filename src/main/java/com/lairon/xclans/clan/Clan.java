@@ -85,8 +85,9 @@ public class Clan implements Listener {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Clan clan)) return false;
-        return clan.getClanID().equals(clanID);
+        if (!(obj instanceof Clan)) return false;
+        Clan clan = (Clan) obj;
+        return clan.getClanID().equalsIgnoreCase(clanID);
     }
 
     public String getClanID() {

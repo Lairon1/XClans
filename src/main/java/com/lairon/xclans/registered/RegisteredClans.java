@@ -1,10 +1,9 @@
 package com.lairon.xclans.registered;
 
-import com.google.common.collect.Maps;
 import com.lairon.xclans.XClans;
 import com.lairon.xclans.clan.Clan;
 import com.lairon.xclans.data.DataProvider;
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -40,12 +40,11 @@ public class RegisteredClans {
         Validate.notNull(id, "Clan id cannot be null");
         Validate.notEmpty(id, "Clan id cannot be empty");
         if (registeredClans.isEmpty()) return null;
-        var first = registeredClans
+        Optional<Clan> first = registeredClans
                 .stream()
                 .filter(clan ->
                         clan.getClanID().equals(id))
                 .findFirst();
-        if(first.isEmpty()) return null;
         return first.get();
     }
 
@@ -58,7 +57,7 @@ public class RegisteredClans {
     public Clan getPlayerClan(@NotNull String player) {
         Validate.notNull(player);
         if (registeredClans.isEmpty()) return null;
-        var first = registeredClans
+        Optional<Clan> first = registeredClans
                 .stream()
                 .filter(clan ->{
                     if(clan.getOwner().equalsIgnoreCase(player)) return true;
@@ -67,7 +66,6 @@ public class RegisteredClans {
                     return false;
                 })
                 .findFirst();
-        if (first.isEmpty()) return null;
         return first.get();
     }
 
@@ -86,7 +84,7 @@ public class RegisteredClans {
         Validate.notNull(clan, "Clan cannot be null");
         Bukkit.getScheduler().runTaskAsynchronously(xClans, ()->{
             try {
-                var nowClan = dataProvider.loadClanByID(clan.getClanID());
+                Clan nowClan = dataProvider.loadClanByID(clan.getClanID());
                 if(nowClan == null){
                     if(callBack != null)
                         callBack.accept(null);

@@ -21,7 +21,7 @@ public class DataProviderTests {
         settings = new DataProviderSettings() {
             @Override
             public boolean isMySqlEnabled() {
-                return true;
+                return false;
             }
 
             @Override
@@ -62,17 +62,17 @@ public class DataProviderTests {
         }
 
         fullClan = new Clan("ZTWO", "Lairon1");
-        fullClan.setMembers(new HashSet<>(){{
+        fullClan.setMembers(new HashSet<String>(){{
             add("Izichka");
             add("Lolshik");
         }});
 
-        fullClan.setModerators(new HashSet<>(){{
+        fullClan.setModerators(new HashSet<String>(){{
             add("Fanerka");
             add("KotenokMoy");
         }});
 
-        fullClan.setWelcomeMessage("Привет бойчик");
+        fullClan.setWelcomeMessage("Сообщение клана");
         fullClan.setBalance(1337);
         fullClan.setExp(1200);
         fullClan.setColor(ChatColor.BLUE);
@@ -81,7 +81,7 @@ public class DataProviderTests {
         fullClan.setLevel(3);
         fullClan.setPvp(true);
 
-        fullClan.setAlliances(new HashSet<>(){{
+        fullClan.setAlliances(new HashSet<String>(){{
             add("ZTWO");
             add("PERSIK");
         }});

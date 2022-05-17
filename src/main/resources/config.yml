@@ -1,4 +1,3 @@
-Messages:
 ClanSettings:
   #Эта регулярное выражение которому должны соответствовать все id кланов;
   #Если не разбираетесь в регулярных выражениях лучше не трогать его
@@ -13,12 +12,13 @@ ClanSettings:
   ColorMoney: 15000
   #Цена установки/изменения клановой базы
   HomeMoney: 15000
-DataProviderSettings:
-  MySql:
-    Enable: false
-    UserName: "UserName"
-    DataBaseName: "DataBaseName"
-    IP: "IP"
-    Password: "Password"
-    #В тиках
-    UpdateTime: 1200
+
+MySql:
+  Enable: false
+  UserName: "UserName"
+  DataBaseName: "DataBaseName"
+  IP: "IP"
+  Password: "Password"
+  #Раз во сколько времени будет обновляться информация о кланах
+  #В тиках
+  UpdateTime: 1200

@@ -1,0 +1,14 @@
+Messages:
+  #MISC
+  PREFIX: "&7[&dXClans&7]: "
+  DONT_HAVE_PERMISSION: "&7У вас нет на это доступа!"
+
+  #Comands
+  AVAILABLE_COMMANDS: "&7Доступные команды:"
+  AVAILABLE_COMMANDS_STYLE: "&d{COMMAND} - &7{DESCRIPTION}"
+  COMMAND_NOT_FOUND: "&7Команда не найдена."
+
+  #Reload command
+  RELOAD: "&7Конфигурации успешно перезагружены."
+  RELOAD_DESCRIPTION: "Перезагружает все конфиги"
+

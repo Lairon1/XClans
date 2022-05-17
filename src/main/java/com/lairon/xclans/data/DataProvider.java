@@ -2,24 +2,18 @@ package com.lairon.xclans.data;
 
 import com.lairon.xclans.clan.Clan;
 import com.lairon.xclans.settings.DataProviderSettings;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 public class DataProvider {
 
     private Connection connection;
-    private DataProviderSettings settings;
+    private ClanFactory clanFactory = new ClanFactory();
 
     public DataProvider(DataProviderSettings settings) throws ClassNotFoundException, SQLException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        this.settings = settings;
         if (settings.isMySqlEnabled()) {
             Class.forName("com.mysql.jdbc.Driver").getDeclaredConstructor().newInstance();
 
@@ -29,28 +23,9 @@ public class DataProvider {
             connection = DriverManager.getConnection("jdbc:sqlite:plugins/XClans/ClansData.db");
         }
         Statement statement = connection.createStatement();
-        statement.execute("""
-                CREATE TABLE IF NOT EXISTS `Clans` (
-                `ID` VARCHAR(43) NOT NULL,
-                `Owner` VARCHAR(45) NOT NULL,
-                `Members` LONGTEXT NULL DEFAULT NULL,
-                `Moderators` LONGTEXT NULL DEFAULT NULL,
-                `WelcomeMessage` LONGTEXT NULL DEFAULT NULL,
-                `Balance` INT NULL DEFAULT 0,
-                `Exp` INT NULL DEFAULT 0,
-                `Date` DATETIME NULL DEFAULT NULL,
-                `Color` VARCHAR(2) NULL DEFAULT NULL,
-                `Home` VARCHAR(45) NULL DEFAULT NULL,
-                `OpenHome` TINYINT NULL DEFAULT 0,
-                `Level` INT NULL DEFAULT 0,
-                `Pvp` TINYINT NULL DEFAULT 0,
-                `Alliances` VARCHAR(45) NULL DEFAULT NULL,
-                PRIMARY KEY (`ID`))               
-                """);
+        statement.execute(" CREATE TABLE IF NOT EXISTS `Clans` (`ID` VARCHAR(43) NOT NULL,`Owner` VARCHAR(45) NOT NULL,`Members` LONGTEXT NULL DEFAULT NULL,`Moderators` LONGTEXT NULL DEFAULT NULL,`WelcomeMessage` LONGTEXT NULL DEFAULT NULL,`Balance` INT NULL DEFAULT 0,`Exp` INT NULL DEFAULT 0,`Date` DATETIME NULL DEFAULT NULL,`Color` VARCHAR(2) NULL DEFAULT NULL,`Home` VARCHAR(45) NULL DEFAULT NULL,`OpenHome` TINYINT NULL DEFAULT 0,`Level` INT NULL DEFAULT 0,`Pvp` TINYINT NULL DEFAULT 0,`Alliances` VARCHAR(45) NULL DEFAULT NULL, PRIMARY KEY (`ID`));");
         statement.close();
-
     }
-
 
     public Clan[] loadAllClans() throws SQLException {
         ArrayList<Clan> clans = new ArrayList<>();
@@ -58,119 +33,56 @@ public class DataProvider {
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery(sql);
         while (resultSet.next()) {
-            Clan clan = parseClan(resultSet);
+            Clan clan = clanFactory.createClanInstanceByResultSet(resultSet);
             clans.add(clan);
         }
+        statement.close();
         return clans.toArray(new Clan[]{});
     }
 
     public void saveClan(Clan clan) throws SQLException {
-        String sql = """              
-                INSERT INTO `Clans`
-                (`ID`,
-                `Owner`,
-                `Members`,
-                `Moderators`,
-                `WelcomeMessage`,
-                `Balance`,
-                `Exp`,
-                `Date`,
-                `Color`,
-                `Home`,
-                `OpenHome`,
-                `Level`,
-                `Pvp`,
-                `Alliances`)
-                VALUES
-                (<{ID}>,
-                <{Owner}>,
-                <{Members}>,
-                <{Moderators}>,
-                <{WelcomeMessage}>,
-                <{Balance}>,
-                <{Exp}>,
-                <{Date}>,
-                <{Color}>,
-                <{Home}>,
-                <{OpenHome}>,
-                <{Level}>,
-                <{Pvp}>,
-                <{Alliances}>);        
-                """;
-        sql = sql.replace("<{ID}>", "\"" + clan.getClanID() + "\"")
-                .replace("<{Owner}>", "\"" + clan.getOwner() + "\"")
-                .replace("<{Members}>", clan.getMembers() == null ? "NULL" : "'" + String.join(" ", clan.getMembers()) + "'")
-                .replace("<{Moderators}>", clan.getModerators() == null ? "NULL" : "'" + String.join(" ", clan.getModerators()) + "'")
-                .replace("<{WelcomeMessage}>", clan.getWelcomeMessage() == null ? "NULL" : "'" + clan.getWelcomeMessage() + "'")
-                .replace("<{Balance}>", clan.getBalance() + "")
-                .replace("<{Exp}>", clan.getExp() + "")
-                .replace("<{Date}>", clan.getDate() == null ? "NULL" : "'" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(clan.getDate()) + "'")
-                .replace("<{Color}>", clan.getColor() == null ? "NULL" : "'" + clan.getColor().toString() + "'")
-                .replace("<{Home}>", clan.getClanHome() == null ? "NULL" : "'" +
-                        clan.getClanHome().getWorld().getName() + " " +
+        String sql = " INSERT INTO `Clans` (`ID`, `Owner`, `Members`, `Moderators`, `WelcomeMessage`, `Balance`, `Exp`, `Date`, `Color`, `Home`, `OpenHome`, `Level`, `Pvp`, `Alliances`) VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1, clan.getClanID());
+        statement.setString(2, clan.getOwner());
+        statement.setString(3, clan.getMembers() == null ? null : String.join(" ", clan.getMembers()));
+        statement.setString(4, clan.getModerators() == null ? null : String.join(" ", clan.getModerators()));
+        statement.setString(5, clan.getWelcomeMessage());
+        statement.setInt(6, clan.getBalance());
+        statement.setInt(7, clan.getExp());
+        statement.setString(8, clan.getDate() == null ? null : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(clan.getDate()));
+        statement.setString(9, clan.getColor() == null ? null : clan.getColor().toString());
+        statement.setString(10, clan.getClanHome() == null ? null :
+                clan.getClanHome().getWorld().getName() + " " +
                         clan.getClanHome().getX() + " " +
                         clan.getClanHome().getY() + " " +
-                        clan.getClanHome().getZ() + "'")
-                .replace("<{OpenHome}>", clan.isOpenCH() + "")
-                .replace("<{Level}>", clan.getLevel() + "")
-                .replace("<{Pvp}>", clan.isPvp() + "")
-                .replace("<{Alliances}>", clan.getAlliances() == null ? "NULL" : "'" + String.join(" ", clan.getAlliances()) + "'");
-
-        var statement = connection.createStatement();
-        statement.execute(sql);
+                        clan.getClanHome().getZ());
+        statement.setBoolean(11, clan.isOpenCH());
+        statement.setInt(12, clan.getLevel());
+        statement.setBoolean(13, clan.isPvp());
+        statement.setString(14, clan.getAlliances() == null ? null : String.join(" ", clan.getAlliances()));
+        statement.execute();
         statement.close();
     }
 
     public Clan loadClanByID(String id) throws SQLException {
-        String sql = "SELECT * FROM Clans WHERE ID = \"" + id + "\"";
-        Statement statement = connection.createStatement();
-        ResultSet resultSet = statement.executeQuery(sql);
-        while (resultSet.next()) {
-            return parseClan(resultSet);
-        }
+        String sql = "SELECT * FROM Clans WHERE ID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1, id);
+        ResultSet resultSet = statement.executeQuery();
+        resultSet.next();
+        Clan clan = clanFactory.createClanInstanceByResultSet(resultSet);
         statement.close();
-        return null;
+        return clan;
     }
 
     public void deleteClan(String id) throws SQLException {
-        String sql = "DELETE FROM `Clans` WHERE ID = \"" + id + "\"";
-        Statement statement = statement = connection.createStatement();
-        statement.execute(sql);
+        String sql = "DELETE FROM `Clans` WHERE ID = ?";
+        PreparedStatement statement = connection.prepareStatement(sql);
+        statement.setString(1, id);
+        statement.execute();
         statement.close();
     }
 
-    private Clan parseClan(ResultSet resultSet) throws SQLException {
-        Clan clan = new Clan(resultSet.getString(1), resultSet.getString(2));
-        var membersString = resultSet.getString(3);
-        if (membersString != null)
-            clan.setMembers(new HashSet<>(Set.of(membersString.split(" "))));
-
-        var moderatorsString = resultSet.getString(4);
-        if (moderatorsString != null)
-            clan.setModerators(new HashSet<>(Set.of(moderatorsString.split(" "))));
-
-        clan.setWelcomeMessage(resultSet.getString(5));
-        clan.setBalance(resultSet.getInt(6));
-        clan.setExp(resultSet.getInt(7));
-        clan.setDate(resultSet.getDate(8));
-        var color = resultSet.getString(9);
-        if (color != null)
-            clan.setColor(ChatColor.getByChar(color));
-
-//        String homeString = resultSet.getString(10);
-//        if (homeString != null) {
-//            String[] homeArr = homeString.split(" ");
-//            Location location = new Location(Bukkit.getWorld(homeArr[0]), Double.parseDouble(homeArr[1]), Double.parseDouble(homeArr[2]), Double.parseDouble(homeArr[3]));
-//            clan.setClanHome(location);
-//        }
-
-        clan.setOpenCH(resultSet.getBoolean(11));
-        clan.setLevel(resultSet.getInt(12));
-        clan.setPvp(resultSet.getBoolean(13));
-        var alliancesString = resultSet.getString(14);
-        if (alliancesString != null)
-            clan.setAlliances(new HashSet<>(Set.of(alliancesString.split(" "))));
-        return clan;
-    }
 
 }
